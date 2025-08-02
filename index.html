@@ -2,12 +2,17 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>CineXpress | HOME</title>
+    <meta property="og:title" content="🎬 CineXpress - Movie Magic Awaits 🍿">
+<meta name="twitter:title" content="🍿 Discover Films on CineXpress 🎥">
+    <title>🎬 CineXpress - Your Ultimate Movie Explorer 🍿</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header class="navbar">
-  <div class="logo">CineXpress</div>
+  <div class="logo">
+  <span role="img" aria-label="Movie Camera">🎥</span>
+  <span class="logo-text">CineXpress</span>
+</div>
   
   <!-- Menu Toggle -->
   <button class="menu-toggle" aria-label="Menu">
@@ -474,6 +479,22 @@ function toggleGenre(genreId) {
   }
   fetchMoviesByGenre(selectedGenres.join(','));
 }
+
+// In your script.js
+const pageEmojis = {
+  '/': '🎬🍿',
+  '/watchlist': '📺✨',
+  '/movie': '🎞️🌟'
+};
+
+function updateDocumentTitle() {
+  const path = window.location.pathname;
+  const emoji = pageEmojis[path] || '🎥';
+  document.title = `${emoji} CineXpress ${emoji}`;
+}
+
+// Call on route changes
+updateDocumentTitle();
 </script>
 </html>
 
