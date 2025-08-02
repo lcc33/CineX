@@ -922,3 +922,40 @@ section {
 .provider-link:hover {
   filter: grayscale(0%) brightness(1.2);
 }
+
+.logo {
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.logo-text {
+  font-family: 'Helvetica Neue', sans-serif;
+  background: linear-gradient(to right, #e50914, #ff6b08);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Prevent emoji scaling on mobile */
+@media (max-width: 768px) {
+  .logo {
+    font-size: 1.8rem;
+  }
+  .logo .emoji {
+    transform: scale(0.9);
+  }
+}
+
+/* Add subtle animation */
+@keyframes popcorn {
+  0% { transform: rotate(-5deg); }
+  50% { transform: rotate(5deg); }
+  100% { transform: rotate(-5deg); }
+}
+
+.logo .emoji:nth-child(3) {
+  display: inline-block;
+  animation: popcorn 2s infinite;
+}
