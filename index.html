@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CineXpress | HOME</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="navbar">
+  <div class="logo">CineXpress</div>
+  
+  <!-- Menu Toggle -->
+  <button class="menu-toggle" aria-label="Menu">
+    <span class="hamburger"></span>
+  </button>
+  
+  <!-- Main Navigation -->
+  <nav class="nav-links">
+    <ul>
+      <li><a href="#" class="active">Home</a></li>
+      <li><a href="#">Movies</a></li>
+      <li><a href="#">TV Shows</a></li>
+      <li><a href="#">Genres <i class="fas fa-chevron-down"></i></a></li>
+      <li><a href="#">Upcoming</a></li>
+      <li><a href="watchlist.html">My Watchlist</a></li>
+      
+    </ul>
+  </nav>
+  
+  <!-- Search & User Section -->
+  <div class="header-actions">
+    <!-- Add to your header -->
+<div class="search-box">
+  <input type="text" id="searchInput" placeholder="Search movies...">
+  <button onclick="searchMovies()"><i class="fas fa-search">🔍</i></button>
+</div>
+    <div class="user-actions">
+      <button class="notifications"><i class="fas fa-bell"></i></button>
+      <div class="user-profile">
+        <img src="user-avatar.jpg" alt="User">
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Hero Slider Section -->
+<section class="hero-slider">
+  <div class="slider-container" id="heroSlider"></div>
+  <div class="slider-controls">
+    <button class="slider-prev"><i class="fas fa-chevron-left"></i></button>
+    <button class="slider-next"><i class="fas fa-chevron-right"></i></button>
+  </div>
+  <div class="slider-dots" id="sliderDots"></div>
+</section>
+
+<section class="movie-section">
+  <h2>Popular Movies</h2>
+  <div class="movie-grid" id="popularMovies"></div>
+</section>
+
+<section class="genre-filters">
+  <h3>Filter by Genre</h3>
+  <div class="genre-buttons" id="genreFilters">
+    <!-- Buttons will be added dynamically -->
+  </div>
+</section>
+
+<section class="trending-section">
+  <h2>Trending Now</h2>
+  <div class="trending-container" id="trendingMovies"></div>
+</section>
+
+<section class="categories">
+  <h2 class="section-title">Top Rated</h2>
+  <!-- Another grid -->
+</section>
+
+<section class="coming-soon">
+  <h2>Coming Soon to Theaters</h2>
+  <div class="coming-soon-grid" id="comingSoonMovies"></div>
+</section>
+
+<footer>
+  <div class="footer-container">
+    <div class="footer-logo">CineXpress</div>
+    
+    <div class="footer-links">
+      <div class="link-column">
+        <h4>Navigation</h4>
+        <ul>
+          <li><a href="#">Home</a></li>
+          <li><a href="#">Movies</a></li>
+          <li><a href="#">TV Shows</a></li>
+          <li><a href="#">My Watchlist</a></li>
+        </ul>
+      </div>
+      
+<div class="search-box">
+  <input type="text" id="searchInput" placeholder="Search movies...">
+  <button onclick="searchMovies()"><i class="fas fa-search">🔍</i></button>
+</div>
+      
+      <div class="link-column">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="#">Terms of Use</a></li>
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Cookie Policy</a></li>
+        </ul>
+      </div>
+      
+      <div class="link-column">
+        <h4>Connect</h4>
+        <div class="social-links">
+          <a href="#"><i class="fab fa-facebook-f"></i></a>
+          <a href="#"><i class="fab fa-twitter"></i></a>
+          <a href="#"><i class="fab fa-instagram"></i></a>
+        </div>
+        <div class="newsletter">
+          <input type="email" placeholder="Your email">
+          <button>Subscribe</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="copyright">
+    <p>© 2024 CineXpress. All rights reserved.</p>
+  </div>
+</footer>
+</body>
+
+<script>
+document.querySelector('.search-box button').addEventListener('click', () => {
+  const query = document.querySelector('.search-box input').value;
+});
+
+
+document.querySelectorAll('.movie-card').forEach(card => {
+  card.addEventListener('mouseenter', () => {
+  });
+});
+
+
+const menuToggle = document.querySelector('.menu-toggle');
+const navLinks = document.querySelector('.nav-links');
+
+menuToggle.addEventListener('click', () => {
+  navLinks.classList.toggle('active');
+  menuToggle.classList.toggle('active');
+  
+
+  document.body.classList.toggle('no-scroll');
+});
+
+
+document.querySelectorAll('.nav-links a').forEach(link => {
+  link.addEventListener('click', () => {
+    navLinks.classList.remove('active');
+    menuToggle.classList.remove('active');
+    document.body.classList.remove('no-scroll');
+  });
+});
+
+
+document.addEventListener('click', (e) => {
+  if (!navLinks.contains(e.target) && !menuToggle.contains(e.target)) {
+    navLinks.classList.remove('active');
+    menuToggle.classList.remove('active');
+    document.body.classList.remove('no-scroll');
+  }
+});
+
+
+
+// Fetch Now Playing Movies for Hero Slider
+async function fetchHeroMovies() {
+  const response = await fetch(`${BASE_URL}/movie/now_playing?api_key=${API_KEY}`);
+  const data = await response.json();
+  return data.results.slice(0, 10); // Get top 5 movies
+}
+
+// Hero Slider Function (single definition)
+async function displayHeroSlider() {
+  const movies = await fetchHeroMovies();
+  const slider = document.getElementById('heroSlider');
+  const dotsContainer = document.getElementById('sliderDots');
+
+  // Create Slides
+  slider.innerHTML = movies.map(movie => `
+    <div class="slide" style="background-image: linear-gradient(to right, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%), url('https://image.tmdb.org/t/p/original${movie.backdrop_path}')">
+      <div class="slide-content" style="background-color: #0000008d">
+        <h1>${movie.title}</h1>
+        <p>${movie.overview.substring(0, 150)}...</p>
+        <div class="hero-buttons">
+          <button class="play-btn">▶ Play</button>
+          <button class="info-btn">ℹ️ More Info</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  // Create Dots
+  dotsContainer.innerHTML = movies.map((_, index) => `
+    <div class="dot ${index === 0 ? 'active' : ''}" data-index="${index}"></div>
+  `).join('');
+
+  // Initialize Slider
+  let currentSlide = 0;
+  const slides = document.querySelectorAll('.slide');
+  const dots = document.querySelectorAll('.dot');
+
+  function updateSlider() {
+    slider.style.transform = `translateX(-${currentSlide * 100}%)`;
+    dots.forEach(dot => dot.classList.remove('active'));
+    dots[currentSlide].classList.add('active');
+  }
+
+  // Auto-rotate every 5 seconds
+  let slideInterval = setInterval(() => {
+    currentSlide = (currentSlide + 1) % slides.length;
+    updateSlider();
+  }, 5000);
+
+  // Next/Prev Controls
+  document.querySelector('.slider-next').addEventListener('click', () => {
+    clearInterval(slideInterval);
+    currentSlide = (currentSlide + 1) % slides.length;
+    updateSlider();
+    slideInterval = setInterval(autoRotate, 5000); // Fixed this line
+  });
+
+  document.querySelector('.slider-prev').addEventListener('click', () => {
+    clearInterval(slideInterval);
+    currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+    updateSlider();
+    slideInterval = setInterval(autoRotate, 5000); // Fixed this line
+  });
+
+  // Dot Navigation
+  dots.forEach(dot => {
+    dot.addEventListener('click', () => {
+      clearInterval(slideInterval);
+      currentSlide = parseInt(dot.dataset.index);
+      updateSlider();
+      slideInterval = setInterval(autoRotate, 5000); // Fixed this line
+    });
+  });
+
+  function autoRotate() {
+    currentSlide = (currentSlide + 1) % slides.length;
+    updateSlider();
+  }
+}
+
+// Call on page load
+window.addEventListener('DOMContentLoaded', displayHeroSlider);
+
+document.querySelectorAll('.genre-card').forEach(card => {
+  card.addEventListener('mouseenter', () => {
+    card.style.boxShadow = `0 10px 20px ${getComputedStyle(card).backgroundColor}50`;
+  });
+  card.addEventListener('mouseleave', () => {
+    card.style.boxShadow = 'none';
+  });
+});
+
+const API_KEY = '38d01855c73113431d5d64e22d399ac4'; // Replace with your key
+const BASE_URL = 'https://api.themoviedb.org/3';
+
+// Fetch Popular Movies
+async function fetchPopularMovies() {
+  try {
+    const response = await fetch(`${BASE_URL}/movie/popular?api_key=${API_KEY}`);
+    const data = await response.json();
+    displayMovies(data.results);
+  } catch (error) {
+    console.error("Error fetching movies:", error);
+  }
+}
+
+
+function displayMovies(movies) {
+  const movieGrid = document.getElementById('popularMovies');
+  movieGrid.innerHTML = movies.map(movie => `
+    <div class="movie-card" onclick="window.location.href='movie.html?id=${movie.id}'">
+      <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${movie.title}">
+      <div class="movie-info">
+        <h3>${movie.title}</h3>
+        <span>⭐ ${movie.vote_average.toFixed(1)}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+
+window.onload = fetchPopularMovies;
+
+async function searchMovies() {
+  const query = document.getElementById('searchInput').value;
+  if (!query) return;
+
+  try {
+    const response = await fetch(`${BASE_URL}/search/movie?api_key=${API_KEY}&query=${query}`);
+    const data = await response.json();
+    displayMovies(data.results);
+  } catch (error) {
+    console.error("Error searching movies:", error);
+  }
+}
+
+
+async function fetchMovieDetails(movieId) {
+  const response = await fetch(`${BASE_URL}/movie/${movieId}?api_key=${API_KEY}`);
+  const data = await response.json();
+  return data;
+}
+
+async function fetchTrailer(movieId) {
+  const response = await fetch(`${BASE_URL}/movie/${movieId}/videos?api_key=${API_KEY}`);
+  const data = await response.json();
+  const trailer = data.results.find(video => video.type === 'Trailer');
+  return trailer ? `https://www.youtube.com/embed/${trailer.key}` : null;
+}
+
+// Initialize all movie sections
+window.addEventListener('DOMContentLoaded', () => {
+  displayHeroSlider();
+  displayTrendingMovies();
+  displayComingSoonMovies();
+});
+
+
+async function fetchGenres() {
+  const response = await fetch(`${BASE_URL}/genre/movie/list?api_key=${API_KEY}`);
+  const data = await response.json();
+  return data.genres;
+}
+
+async function displayGenres() {
+  const genres = await fetchGenres();
+  const genresContainer = document.getElementById('genresFilter');
+  genresContainer.innerHTML = genres.map(genre => `
+    <button onclick="fetchMoviesByGenre(${genre.id})">${genre.name}</button>
+  `).join('');
+}
+
+const movieCache = {};
+
+async function fetchWithCache(url) {
+  if (movieCache[url]) return movieCache[url];
+  
+  const response = await fetch(url);
+  const data = await response.json();
+  movieCache[url] = data;
+  return data;
+}
+
+// Fetch Trending Movies
+async function fetchTrendingMovies() {
+  const response = await fetch(`${BASE_URL}/trending/movie/week?api_key=${API_KEY}`);
+  const data = await response.json();
+  return data.results;
+}
+
+// Display Trending Movies
+async function displayTrendingMovies() {
+  const movies = await fetchTrendingMovies();
+  const container = document.getElementById('trendingMovies');
+  
+  container.innerHTML = movies.map(movie => `
+    <div class="trending-card">
+      <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${movie.title}">
+      <div class="trending-overlay">
+        <h4>${movie.title}</h4>
+        <span>⭐ ${movie.vote_average.toFixed(1)}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Fetch Upcoming Movies
+async function fetchUpcomingMovies() {
+  const response = await fetch(`${BASE_URL}/movie/upcoming?api_key=${API_KEY}`);
+  const data = await response.json();
+  return data.results;
+}
+
+// Display Coming Soon Movies
+async function displayComingSoonMovies() {
+  const movies = await fetchUpcomingMovies();
+  const container = document.getElementById('comingSoonMovies');
+  
+  container.innerHTML = movies.slice(0, 12).map(movie => `
+    <div class="coming-soon-card">
+      <img src="https://image.tmdb.org/t/p/w300${movie.poster_path}" alt="${movie.title}">
+      <div class="coming-soon-date">
+        ${new Date(movie.release_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+      </div>
+      <div class="coming-soon-info">
+        <h4>${movie.title}</h4>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Initialize the page
+async function init() {
+  await displayGenreFilters();
+  await fetchMoviesByGenre('all'); // Load popular movies by default
+}
+
+window.onload = init;
+
+// Fetch movies by genre (or all if genreId === 'all')
+async function fetchMoviesByGenre(genreId = 'all') {
+  try {
+    const url = genreId === 'all' 
+      ? `${BASE_URL}/movie/popular?api_key=${API_KEY}`
+      : `${BASE_URL}/discover/movie?api_key=${API_KEY}&with_genres=${genreId}`;
+    
+    const response = await fetch(url);
+    const data = await response.json();
+    displayMovies(data.results);
+  } catch (error) {
+    console.error("Error fetching movies by genre:", error);
+  }
+}
+
+
+// Fetch all movie genres
+async function fetchGenres() {
+  try {
+    const response = await fetch(`${BASE_URL}/genre/movie/list?api_key=${API_KEY}`);
+    const data = await response.json();
+    return data.genres;
+  } catch (error) {
+    console.error("Error fetching genres:", error);
+    return [];
+  }
+}
+
+// Display genre filters
+async function displayGenreFilters() {
+  const genres = await fetchGenres();
+  const genreContainer = document.getElementById('genreFilters');
+  
+  // Add "All" button first
+  genreContainer.innerHTML = `
+    <button class="genre-btn active" data-id="all">All</button>
+    ${genres.map(genre => `
+      <button class="genre-btn" data-id="${genre.id}">${genre.name}</button>
+    `).join('')}
+  `;
+  
+  // Add click event listeners
+  document.querySelectorAll('.genre-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.genre-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const genreId = btn.dataset.id;
+      fetchMoviesByGenre(genreId);
+    });
+  });
+}
+
+let selectedGenres = [];
+
+function toggleGenre(genreId) {
+  if (selectedGenres.includes(genreId)) {
+    selectedGenres = selectedGenres.filter(id => id !== genreId);
+  } else {
+    selectedGenres.push(genreId);
+  }
+  fetchMoviesByGenre(selectedGenres.join(','));
+}
+</script>
+</html>
+

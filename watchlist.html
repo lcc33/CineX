@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CineXpress - My Watchlist</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <header class="navbar">
+    <div class="logo">CineXpress</div>
+    <nav>
+      <a href="index.html"><i class="fas fa-home"></i> Home</a>
+    </nav>
+  </header>
+  <br>
+
+  <main class="watchlist-container">
+    <h1><i class="fas fa-bookmark"></i> My Watchlist</h1>
+    
+    <div class="watchlist-actions">
+      <button id="sortByDate"><i class="fas fa-calendar"></i> Sort by Date</button>
+      <button id="clearAll"><i class="fas fa-trash"></i> Clear All</button>
+    </div>
+
+    <div class="watchlist-grid" id="watchlistGrid">
+      <!-- Dynamic content will appear here -->
+    </div>
+
+    <div class="empty-state" id="emptyState">
+      <img src="https://i.imgur.com/9JqKZbA.png" alt="Empty watchlist">
+      <h2>Your watchlist is empty</h2>
+      <p>Start adding movies from the homepage!</p>
+      <a href="index.html" class="btn-primary"><i class="fas fa-film"></i> Browse Movies</a>
+    </div>
+  </main>
+
+  <script>
+      // Watchlist Functions
+function displayWatchlist() {
+  const watchlist = JSON.parse(localStorage.getItem('watchlist')) || [];
+  const watchlistGrid = document.getElementById('watchlistGrid');
+  const emptyState = document.getElementById('emptyState');
+
+  // Clear previous content
+  watchlistGrid.innerHTML = '';
+
+  if (watchlist.length === 0) {
+    emptyState.style.display = 'block';
+    watchlistGrid.style.display = 'none';
+  } else {
+    emptyState.style.display = 'none';
+    watchlistGrid.style.display = 'grid';
+    
+    watchlist.forEach(movie => {
+      const movieElement = document.createElement('div');
+      movieElement.className = 'watchlist-item';
+      movieElement.innerHTML = `
+        <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" 
+             alt="${movie.title}" 
+             class="watchlist-poster"
+             onclick="window.location.href='movie.html?id=${movie.id}'">
+        <div class="watchlist-details">
+          <h3>${movie.title}</h3>
+          <div class="watchlist-meta">
+            <span>${new Date(movie.addedAt).toLocaleDateString()}</span>
+            <span>⭐ ${Math.random() * 5 + 5 | 0}/10</span>
+          </div>
+        </div>
+        <button class="remove-btn" data-movie-id="${movie.id}">
+          <i class="fas fa-times"></i>
+        </button>
+      `;
+      watchlistGrid.appendChild(movieElement);
+    });
+
+    // Add remove event listeners
+    document.querySelectorAll('.remove-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        removeFromWatchlist(btn.dataset.movieId);
+      });
+    });
+  }
+}
+
+function removeFromWatchlist(movieId) {
+  let watchlist = JSON.parse(localStorage.getItem('watchlist')) || [];
+  watchlist = watchlist.filter(movie => movie.id !== parseInt(movieId));
+  localStorage.setItem('watchlist', JSON.stringify(watchlist));
+  displayWatchlist(); // Refresh the display
+}
+
+function clearWatchlist() {
+  if (confirm('Are you sure you want to clear your entire watchlist?')) {
+    localStorage.removeItem('watchlist');
+    displayWatchlist();
+  }
+}
+
+function sortWatchlist() {
+  const watchlist = JSON.parse(localStorage.getItem('watchlist')) || [];
+  watchlist.sort((a, b) => new Date(b.addedAt) - new Date(a.addedAt));
+  localStorage.setItem('watchlist', JSON.stringify(watchlist));
+  displayWatchlist();
+}
+
+// Initialize watchlist page
+if (window.location.pathname.includes('watchlist.html')) {
+  // Load watchlist on page load
+  displayWatchlist();
+
+  // Add event listeners
+  document.getElementById('clearAll')?.addEventListener('click', clearWatchlist);
+  document.getElementById('sortByDate')?.addEventListener('click', sortWatchlist);
+}
+  </script>
+</body>
+</html>
