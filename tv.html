@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>TV Shows | CineXpress</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <style>
+      
+      /* Reset and Base Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #e50914;
+      --dark: #141414;
+      --light: #f4f4f4;
+      --gray: #999;
+      --card-bg: #181818;
+    }
+
+    body {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      background-color: var(--dark);
+      color: white;
+      padding-top: 70px; /* Space for fixed header */
+    }
+
+    /* Fixed Header */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(10, 10, 10, 0.98);
+      padding: 1rem;
+      z-index: 1000;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 2rem;
+      font-weight: bold;
+      color: var(--primary);
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+
+    /* Popcorn Animation */
+    .emoji-animation {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .popcorn-emoji {
+      position: absolute;
+      font-size: 1.5rem;
+      opacity: 0;
+      animation: floatPopcorn 4s infinite;
+    }
+
+    @keyframes floatPopcorn {
+      0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0;
+        left: 10%;
+      }
+      10% {
+        opacity: 1;
+      }
+      90% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-100px) rotate(20deg);
+        opacity: 0;
+        left: 90%;
+      }
+    }
+
+    .popcorn-emoji:nth-child(1) { animation-delay: 0s; left: 15%; }
+    .popcorn-emoji:nth-child(2) { animation-delay: 1s; left: 30%; }
+    .popcorn-emoji:nth-child(3) { animation-delay: 2s; left: 45%; }
+    .popcorn-emoji:nth-child(4) { animation-delay: 3s; left: 60%; }
+
+    /* Menu Toggle */
+    .menu-toggle {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 10px;
+      z-index: 1000;
+      display: none;
+    }
+
+    .hamburger {
+      display: block;
+      width: 25px;
+      height: 3px;
+      background: white;
+      margin: 5px 0;
+      transition: all 0.3s ease;
+    }
+
+    /* Navigation Links */
+    .nav-links ul {
+      display: flex;
+      list-style: none;
+      gap: 1.5rem;
+    }
+
+    .nav-links a {
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    .nav-links a:hover {
+      color: var(--primary);
+    }
+
+    /* Search Box */
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .search-box {
+      display: flex;
+    }
+
+    .search-box input {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 4px 0 0 4px;
+      background: rgba(255,255,255,0.2);
+      color: white;
+    }
+
+    .search-box button {
+      padding: 0 1rem;
+      background: rgba(255,255,255,0.3);
+      border: none;
+      border-radius: 0 4px 4px 0;
+      color: white;
+      cursor: pointer;
+    }
+    
+    /* Base Styles */
+    :root {
+      --primary: #e50914;
+      --dark: #141414;
+      --light: #f4f4f4;
+      --gray: #999;
+      --card-bg: #181818;
+    }
+
+    body {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      background-color: var(--dark);
+      color: white;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* TV Show Container */
+    .tv-container {
+      padding: 2rem 5%;
+      margin-top: 80px;
+    }
+
+    /* Section Header with View All Button */
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .section-header h2 {
+      font-size: 1.8rem;
+      margin: 0;
+      color: var(--primary);
+    }
+
+    .view-all {
+      background: transparent;
+      border: 1px solid var(--gray);
+      color: white;
+      padding: 0.5rem 1.5rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 0.9rem;
+    }
+
+    .view-all:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    /* TV Shows Grid */
+    .shows-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 1.5rem;
+    }
+
+    /* TV Show Cards */
+    .tv-card {
+      background: var(--card-bg);
+      border-radius: 8px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      position: relative;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    .tv-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+    }
+
+    .tv-card img {
+      width: 100%;
+      height: 270px;
+      object-fit: cover;
+      border-bottom: 3px solid var(--primary);
+    }
+
+    .tv-card h3 {
+      margin: 0.8rem;
+      font-size: 1rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tv-card p {
+      margin: 0 0.8rem 0.8rem;
+      color: var(--gray);
+      font-size: 0.8rem;
+    }
+
+    /* TV Badge */
+    .tv-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: var(--primary);
+      color: white;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: bold;
+    }
+
+    /* Trending Section */
+    .trending-section {
+      margin-bottom: 2.5rem;
+    }
+
+    .trending-carousel {
+      display: flex;
+      overflow-x: auto;
+      gap: 1rem;
+      padding: 1rem 0;
+      scrollbar-width: thin;
+    }
+
+    .trending-item {
+      flex: 0 0 280px;
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .trending-item img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+    }
+
+    .trending-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: var(--primary);
+      color: white;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+
+    /* Genre Filter */
+    .genre-filter {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .genre-btn {
+      padding: 0.5rem 1rem;
+      background: #333;
+      border: none;
+      border-radius: 20px;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 0.8rem;
+    }
+
+    .genre-btn:hover, .genre-btn.active {
+      background: var(--primary);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .shows-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 1rem;
+      }
+
+      .tv-card img {
+        height: 220px;
+      }
+
+      .trending-item {
+        flex: 0 0 220px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .shows-grid {
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      }
+
+      .tv-card img {
+        height: 190px;
+      }
+
+      .tv-card h3 {
+        font-size: 0.9rem;
+      }
+
+      .trending-item {
+        flex: 0 0 180px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+  <div class="logo">
+  <span class="emoji camera">🎥</span>
+  <span class="logo-text">CineXpress</span>
+  <span class="emoji popcorn">🍿</span>
+  
+  <!-- Floating popcorn elements -->
+  <div class="emoji-animation">
+    <span class="popcorn-emoji">🍿</span>
+    <span class="popcorn-emoji">🍿</span>
+    <span class="popcorn-emoji">🍿</span>
+    <span class="popcorn-emoji">🍿</span>
+  </div>
+</div>
+  
+  <!-- Menu Toggle -->
+  <button class="menu-toggle" aria-label="Menu">
+      <span class="hamburger"></span>
+    </button>
+  
+  <!-- Main Navigation -->
+  <nav class="nav-links">
+    <ul>
+      <li><a href="index.html" class="active">Home</a></li>
+      <li><a href="#">Movies</a></li>
+      <li><a href="tv.html">TV Shows</a></li>
+      <li><a href="#">Upcoming</a></li>
+      <li><a href="watchlist.html">My Watchlist</a></li>
+      
+    </ul>
+  </nav>
+  
+  <!-- Search & User Section -->
+  <div class="header-actions">
+    <!-- Add to your header -->
+<div class="search-box">
+  <input type="text" id="searchInput" placeholder="Search movies...">
+  <button onclick="searchTVSeries()"><i class="fas fa-search"></i></button>
+</div>
+  </div>
+</header>
+
+  <main class="tv-container">
+    <!-- Trending Section -->
+    <section class="trending-section">
+      <h2><i class="fas fa-fire"></i> Trending This Week</h2>
+      <div class="trending-carousel" id="trendingCarousel">
+        <!-- Trending shows will be loaded here -->
+      </div>
+    </section>
+
+    <!-- Main TV Shows Section -->
+    <div class="section-header">
+      <h2><i class="fas fa-tv"></i> Popular TV Shows</h2>
+      <button class="view-all" id="viewAllBtn">View All</button>
+    </div>
+
+    <!-- Genre Filter -->
+    <div class="genre-filter" id="genreFilter">
+      <!-- Genres will be loaded here -->
+    </div>
+
+    <!-- TV Shows Grid -->
+    <div class="shows-grid" id="showsGrid">
+      <!-- Shows will be loaded here -->
+    </div>
+  </main>
+
+  <script>
+    const API_KEY = '38d01855c73113431d5d64e22d399ac4';
+    const BASE_URL = 'https://api.themoviedb.org/3';
+    let allShows = [];
+    let currentGenre = 'all';
+    let isViewAll = false;
+
+    // DOM Elements
+    const trendingCarousel = document.getElementById('trendingCarousel');
+    const genreFilter = document.getElementById('genreFilter');
+    const showsGrid = document.getElementById('showsGrid');
+    const viewAllBtn = document.getElementById('viewAllBtn');
+
+    // Fetch Trending Shows
+    async function fetchTrendingShows() {
+      try {
+        const res = await fetch(`${BASE_URL}/trending/tv/week?api_key=${API_KEY}`);
+        const data = await res.json();
+        
+        trendingCarousel.innerHTML = data.results.slice(0, 10).map((show, index) => `
+          <div class="trending-item" data-id="${show.id}">
+            <img src="https://image.tmdb.org/t/p/w500${show.backdrop_path || show.poster_path}" 
+                 alt="${show.name}"
+                 loading="lazy">
+            <div class="trending-badge">#${index + 1}</div>
+          </div>
+        `).join('');
+
+        // Add click event to trending items
+        document.querySelectorAll('.trending-item').forEach(item => {
+          item.addEventListener('click', () => {
+            const showId = item.dataset.id;
+            window.location.href = `details.html?id=${showId}`;
+          });
+        });
+
+      } catch (err) {
+        console.error("Failed to load trending shows", err);
+      }
+    }
+
+    // Fetch TV Genres
+    async function fetchTVGenres() {
+      try {
+        const res = await fetch(`${BASE_URL}/genre/tv/list?api_key=${API_KEY}`);
+        const data = await res.json();
+        
+        // Add 'All' genre first
+        genreFilter.innerHTML = `
+          <button class="genre-btn active" data-genre="all">All</button>
+          ${data.genres.map(genre => `
+            <button class="genre-btn" data-genre="${genre.id}">${genre.name}</button>
+          `).join('')}
+        `;
+
+        // Add genre filter event listeners
+        document.querySelectorAll('.genre-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            document.querySelectorAll('.genre-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentGenre = btn.dataset.genre;
+            filterShows();
+          });
+        });
+
+      } catch (err) {
+        console.error("Failed to load genres", err);
+      }
+    }
+
+    // Fetch Popular Shows
+    async function fetchPopularShows() {
+      try {
+        const res = await fetch(`${BASE_URL}/tv/popular?api_key=${API_KEY}`);
+        const data = await res.json();
+        allShows = data.results;
+        filterShows();
+
+      } catch (err) {
+        console.error("Failed to load TV shows", err);
+        showsGrid.innerHTML = `
+          <div style="grid-column:1/-1; text-align:center; padding:2rem;">
+            <h3>Failed to load TV shows</h3>
+            <button onclick="fetchPopularShows()">Retry</button>
+          </div>
+        `;
+      }
+    }
+
+    // Filter and Display Shows
+    function filterShows() {
+      let filteredShows = allShows;
+      
+      // Filter by genre if not 'all'
+      if (currentGenre !== 'all') {
+        filteredShows = allShows.filter(show => 
+          show.genre_ids.includes(Number(currentGenre))
+        );
+      }
+
+      // Show either limited or all shows based on view state
+      const showsToDisplay = isViewAll ? filteredShows : filteredShows.slice(0, 9);
+      
+      displayShows(showsToDisplay);
+    }
+
+    // Display Shows in Grid
+    function displayShows(shows) {
+      showsGrid.innerHTML = shows.map(show => `
+        <div class="tv-card" data-id="${show.id}">
+          <img src="https://image.tmdb.org/t/p/w300${show.poster_path}" 
+               alt="${show.name}" 
+               loading="lazy"
+               onerror="this.src='placeholder.jpg'">
+          <div class="tv-badge">TV</div>
+          <h3>${show.name}</h3>
+          <p>${show.first_air_date ? new Date(show.first_air_date).getFullYear() : 'N/A'}</p>
+        </div>
+      `).join('');
+
+      // Add click event to each card
+      document.querySelectorAll('.tv-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const showId = card.dataset.id;
+          window.location.href = `details.html?id=${showId}`;
+        });
+      });
+    }
+
+    // View All Button
+    viewAllBtn.addEventListener('click', () => {
+      isViewAll = !isViewAll;
+      viewAllBtn.textContent = isViewAll ? 'Show Less' : 'View All';
+      filterShows();
+    });
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchTrendingShows();
+      fetchTVGenres();
+      fetchPopularShows();
+    });
+    
+    // Add these new functions for search functionality
+document.addEventListener('DOMContentLoaded', function() {
+  const API_KEY = '38d01855c73113431d5d64e22d399ac4';
+  const BASE_URL = 'https://api.themoviedb.org/3';
+  const searchInput = document.querySelector('.search-box input');
+  const searchButton = document.querySelector('.search-box button');
+  const searchResults = document.querySelector('.search-results');
+  const tvSeriesContainer = document.querySelector('.tv-series-container');
+
+  // Initialize
+  searchResults.style.display = 'none';
+
+  // Search function with error handling
+  async function searchTVSeries(query) {
+    try {
+      const response = await fetch(
+        `${BASE_URL}/search/tv?api_key=${API_KEY}&query=${encodeURIComponent(query)}`
+      );
+      if (!response.ok) throw new Error('Network response was not ok');
+      const data = await response.json();
+      return data.results || [];
+    } catch (error) {
+      console.error('Search failed:', error);
+      return [];
+    }
+  }
+
+  // Display results
+  function displaySearchResults(series) {
+    if (!series || series.length === 0) {
+      searchResults.innerHTML = '<p class="search-message">No results found</p>';
+      return;
+    }
+
+    searchResults.innerHTML = series.map(show => `
+      <div class="tv-series-card" data-id="${show.id}">
+        <img src="${show.poster_path ? `https://image.tmdb.org/t/p/w300${show.poster_path}` : 'images/placeholder.jpg'}" 
+             alt="${show.name}" 
+             onerror="this.src='images/placeholder.jpg'">
+        <div class="tv-series-info">
+          <h3>${show.name}</h3>
+          <span>⭐ ${show.vote_average?.toFixed(1) || 'N/A'}</span>
+        </div>
+      </div>
+    `).join('');
+
+    // Add click handlers
+    document.querySelectorAll('.tv-series-card').forEach(card => {
+      card.addEventListener('click', () => {
+        window.location.href = `tv-details.html?id=${card.dataset.id}`;
+      });
+    });
+
+    tvSeriesContainer.style.display = 'none';
+    searchResults.style.display = 'grid';
+  }
+
+  // Event listeners
+  const handleSearch = async () => {
+    const query = searchInput.value.trim();
+    if (!query) {
+      searchResults.style.display = 'none';
+      tvSeriesContainer.style.display = 'grid';
+      return;
+    }
+    const results = await searchTVSeries(query);
+    displaySearchResults(results);
+  };
+
+  searchButton.addEventListener('click', handleSearch);
+  searchInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') handleSearch();
+  });
+});
+  </script>
+</body>
+</html>
