@@ -211,7 +211,7 @@ async function displayHeroSlider() {
   const slider = document.getElementById('heroSlider');
   const dotsContainer = document.getElementById('sliderDots');
 
-  // Create Slides
+   // Create Slides
   slider.innerHTML = movies.map(movie => `
     <div class="slide" style="background-image: linear-gradient(to right, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%), url('https://image.tmdb.org/t/p/original${movie.backdrop_path}')">
       <div class="slide-content" style="background-color: #0000008d">
