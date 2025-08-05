@@ -300,23 +300,26 @@ async function fetchPopularMovies() {
     const data = await response.json();
     displayMovies(data.results);
   } catch (error) {
-    console.error("Error fetching movies:", error);
+    console.error("Error fetching popular content:", error);
   }
 }
 
-
 function displayMovies(movies) {
   const movieGrid = document.getElementById('popularMovies');
+
   movieGrid.innerHTML = movies
-    .filter(movie => movie.media_type === 'movie' || movie.media_type === 'tv')
-    .map(movie => {
-      const type = movie.media_type === 'tv' ? 'tv-details' : 'details';
+    .filter(item => item.media_type === 'movie' || item.media_type === 'tv')
+    .map(item => {
+      const type = item.media_type === 'tv' ? 'tv-details' : 'details';
+      const title = item.title || item.name || 'Untitled';
+      const poster = item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : 'placeholder.jpg';
+
       return `
-        <div class="movie-card" onclick="window.location.href='${type}.html?id=${movie.id}'">
-          <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${movie.title || movie.name}">
+        <div class="movie-card" onclick="window.location.href='${type}.html?id=${item.id}'">
+          <img src="${poster}" alt="${title}">
           <div class="movie-info">
-            <h3>${movie.title || movie.name}</h3>
-            <span>⭐ ${movie.vote_average.toFixed(1)}</span>
+            <h3>${title}</h3>
+            <span>⭐ ${item.vote_average?.toFixed(1) || 'N/A'}</span>
           </div>
         </div>
       `;
