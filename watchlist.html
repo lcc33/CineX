@@ -3,12 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CineXpress - My Watchlist</title>
+  <title>📽️CineXpress - My Watchlist🔭</title>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
   <header class="navbar">
+    <span role="img" aria-label="Movie Camera">🎥</span>
     <div class="logo">CineXpress</div>
     <nav>
       <a href="index.html"><i class="fas fa-home"></i> Home</a>
@@ -60,7 +61,7 @@ function displayWatchlist() {
         <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" 
              alt="${movie.title}" 
              class="watchlist-poster"
-             onclick="window.location.href='movie.html?id=${movie.id}'">
+             onclick="window.location.href='details.html?id=${movie.id}'">
         <div class="watchlist-details">
           <h3>${movie.title}</h3>
           <div class="watchlist-meta">

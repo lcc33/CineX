@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎬 CineXpress - Series Details 🧾</title>
+  <link rel="stylesheet" href="detail-style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+      @media (min-width: 768px) {
+  .movie-hero {
+      display: none;
+      z-index: 1;
+  }
+
+  .movie-poster {
+    margin-bottom: 0;
+  }
+  
+  .movie-poster img {
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+}
+
+.cast-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1.5rem;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+}
+
+.movie-poster {
+  z-index: 10;
+  max-width: 300px;
+  margin-bottom: 1.5rem;
+}
+
+
+.movie-info {
+  z-index: 100;
+  max-width: 800px;
+  margin: 0 auto;
+  background-color: #000000ea;
+}
+
+.movie-hero {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 3rem 1rem;
+  min-height: 80vh;
+}
+
+.movie-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.75); /* Dark overlay */
+  z-index: 0;
+}
+
+
+
+  </style>
+</head>
+<body>
+  <!-- Header content remains the same -->
+  <header class="navbar">
+    <span role="img" aria-label="Movie Camera">🎥</span>
+    <div class="logo">CineXpress</div>
+    <button class="menu-toggle" aria-label="Menu">
+      <span class="hamburger"></span>
+    </button>
+    <nav class="nav-links">
+      <ul>
+        <li><a href="index.html" class="active">Home</a></li>
+        <li><a href="#">Movies</a></li>
+        <li><a href="tv.html">TV Shows</a></li>
+        <li><a href="index.html">Genres</a></li>
+        <li><a href="#">Upcoming</a></li>
+        <li><a href="watchlist.html">My Watchlist</a></li>
+      </ul>
+    </nav>
+    <div class="navigation">
+      <button style="justify-content: center; border-radius: 50%; width: 35px; height: 35px;" onclick="history.back()"><img style="height: 30px; width: 30px; border-radius: 50%;" src="images/back.png" alt=""></button>
+    </div>
+  </header>
+
+  <main class="movie-details-container" id="movieDetails">
+    <!-- Content will be dynamically inserted here -->
+  </main>
+  
+  <script>
+    const API_KEY = '38d01855c73113431d5d64e22d399ac4';
+    const BASE_URL = 'https://api.themoviedb.org/3';
+
+    // Menu toggle functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      const menuToggle = document.querySelector('.menu-toggle');
+      const navLinks = document.querySelector('.nav-links');
+
+      if (menuToggle && navLinks) {
+        menuToggle.addEventListener('click', function() {
+          navLinks.classList.toggle('active');
+          menuToggle.classList.toggle('active');
+          document.body.classList.toggle('no-scroll');
+        });
+
+        document.querySelectorAll('.nav-links a').forEach(link => {
+          link.addEventListener('click', function() {
+            navLinks.classList.remove('active');
+            menuToggle.classList.remove('active');
+            document.body.classList.remove('no-scroll');
+          });
+        });
+
+        document.addEventListener('click', function(e) {
+          if (!navLinks.contains(e.target) && !menuToggle.contains(e.target)) {
+            navLinks.classList.remove('active');
+            menuToggle.classList.remove('active');
+            document.body.classList.remove('no-scroll');
+          }
+        });
+      }
+      
+      menuToggle.addEventListener('click', function() {
+  navLinks.classList.toggle('mobile-active');
+  menuToggle.classList.toggle('active');
+  document.body.classList.toggle('no-scroll');
+});
+
+       });
+       
+       // Initialize page  
+if (window.location.pathname.includes('details.html')) {
+  const urlParams = new URLSearchParams(window.location.search);
+  const id = urlParams.get('id');
+
+  // Function to show TV series details
+  async function showSeriesDetails(seriesId) {
+    try {
+      const [seriesResponse, similarResponse] = await Promise.all([
+        fetch(`${BASE_URL}/tv/${seriesId}?api_key=${API_KEY}&append_to_response=videos,credits`),
+        fetch(`${BASE_URL}/tv/${seriesId}/similar?api_key=${API_KEY}`)
+      ]);
+
+      if (!seriesResponse.ok || !similarResponse.ok) {
+        throw new Error('Failed to fetch series data');
+      }
+
+      const series = await seriesResponse.json();
+      const similar = await similarResponse.json();
+
+      document.getElementById('movieDetails').innerHTML = `
+        <section class="movie-hero" style="background-image: url('https://image.tmdb.org/t/p/original${series.backdrop_path || ''}')">
+          <div class="hero-overlay"></div>
+          <div class="movie-poster">
+            <img src="${series.poster_path ? `https://image.tmdb.org/t/p/w500${series.poster_path}` : 'placeholder.jpg'}" 
+                 alt="${series.name || 'TV Series poster'}" 
+                 loading="lazy">
+          </div>
+          <div class="movie-info">
+            <h1>${series.name || 'Untitled'} <span>(${series.first_air_date ? new Date(series.first_air_date).getFullYear() : 'N/A'})</span></h1>
+            <div class="meta">
+              <span class="rating">⭐ ${series.vote_average ? series.vote_average.toFixed(1) : 'N/A'}</span>
+              <span>${series.episode_run_time?.[0] || 'N/A'} min</span>
+              <span>${series.genres ? series.genres.map(g => g.name).join(', ') : 'N/A'}</span>
+            </div>
+
+            <h3>Overview</h3>
+            <p>${series.overview || 'No overview available'}</p>
+
+            <div class="cta-buttons">
+              ${series.videos?.results?.[0]?.key ? `
+                <button class="watch-trailer" data-youtube-id="${series.videos.results[0].key}">
+                  ▶ Play Trailer
+                </button>
+              ` : ''}
+              <button class="add-favorites" data-series-id="${series.id}">
+                + My List
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section class="cast-section">
+          <h2>Cast</h2>
+          <div class="cast-grid">
+            ${series.credits?.cast?.slice(0, 10).map(actor => `
+              <div class="actor-card">
+                <img src="${actor.profile_path ? `https://image.tmdb.org/t/p/w200${actor.profile_path}` : 'placeholder-actor.jpg'}"
+                     alt="${actor.name || 'Actor'}"
+                     loading="lazy">
+                <h4>${actor.name || 'Unknown'}</h4>
+                <p>${actor.character || 'Unknown'}</p>
+              </div>
+            `).join('') || '<p>No cast information available</p>'}
+          </div>
+        </section>
+
+        <section class="similar-movies">
+          <h2>You May Also Like</h2>
+          <div class="movie-grid">
+            ${similar.results?.slice(0, 5).map(tv => `
+              <div class="movie-card" data-id="${tv.id}">
+                <img src="${tv.poster_path ? `https://image.tmdb.org/t/p/w300${tv.poster_path}` : 'placeholder.jpg'}" 
+                     alt="${tv.name || 'TV Show'}"
+                     loading="lazy">
+              </div>
+            `).join('') || '<p>No similar shows found</p>'}
+          </div>
+        </section>
+      `;
+
+      // Add event listeners
+      document.querySelector('.watch-trailer')?.addEventListener('click', function (e) {
+        const youtubeId = e.target.dataset.youtubeId;
+        if (youtubeId) {
+          document.body.insertAdjacentHTML('beforeend', `
+            <div class="trailer-modal">
+              <div class="modal-content">
+                <iframe src="https://www.youtube.com/embed/${youtubeId}?autoplay=1"
+                        frameborder="0"
+                        allowfullscreen></iframe>
+                <button class="close-modal">×</button>
+              </div>
+            </div>
+          `);
+
+          document.querySelector('.close-modal').addEventListener('click', function () {
+            document.querySelector('.trailer-modal').remove();
+          });
+        }
+      });
+
+      document.querySelectorAll('.movie-card').forEach(card => {
+        card.addEventListener('click', function () {
+          const id = card.dataset.id;
+          if (id) window.location.href = `details.html?id=${id}`;
+        });
+      });
+
+      // Add to watchlist
+      document.querySelector('.add-favorites')?.addEventListener('click', function () {
+        addToWatchlist(series.id, series.name, series.poster_path);
+      });
+
+    } catch (error) {
+      console.error("Error loading series details:", error);
+      document.getElementById('movieDetails').innerHTML = `
+        <div class="error-message">
+          <h2>Failed to load series details</h2>
+          <p>${error.message}</p>
+          <button onclick="window.location.reload()">Retry</button>
+        </div>
+      `;
+    }
+  }
+
+  // Watchlist function
+  function addToWatchlist(id, name, poster_path) {
+    let watchlist = JSON.parse(localStorage.getItem('watchlist') || '[]');
+    if (!watchlist.some(item => item.id === id)) {
+      watchlist.push({
+        id,
+        title: name,
+        poster_path,
+        addedAt: new Date().toISOString()
+      });
+      localStorage.setItem('watchlist', JSON.stringify(watchlist));
+
+      const btn = document.querySelector(`.add-favorites[data-series-id="${id}"]`);
+      if (btn) {
+        btn.textContent = '✓ Added';
+        btn.style.backgroundColor = '#4CAF50';
+        setTimeout(() => {
+          btn.textContent = '+ My List';
+          btn.style.backgroundColor = '';
+        }, 2000);
+      }
+    }
+  }
+
+  // Call the function
+  showSeriesDetails(id);
+}
+
+
+
+     
+  </script>
+</body>
+</html>
+</html>

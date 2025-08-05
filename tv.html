@@ -363,6 +363,14 @@
         flex: 0 0 180px;
       }
     }
+    
+    .search-results {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1.5rem;
+  padding: 1rem 0;
+}
+
   </style>
 </head>
 <body>
@@ -403,7 +411,7 @@
     <!-- Add to your header -->
 <div class="search-box">
   <input type="text" id="searchInput" placeholder="Search movies...">
-  <button onclick="searchTVSeries()"><i class="fas fa-search"></i></button>
+  <button><i class="fas fa-search"></i></button>
 </div>
   </div>
 </header>
@@ -432,11 +440,16 @@
     <div class="shows-grid" id="showsGrid">
       <!-- Shows will be loaded here -->
     </div>
+    
+    <div class="search-results"></div>
+    
   </main>
 
   <script>
+  document.addEventListener('DOMContentLoaded', () => {
     const API_KEY = '38d01855c73113431d5d64e22d399ac4';
     const BASE_URL = 'https://api.themoviedb.org/3';
+
     let allShows = [];
     let currentGenre = 'all';
     let isViewAll = false;
@@ -446,8 +459,73 @@
     const genreFilter = document.getElementById('genreFilter');
     const showsGrid = document.getElementById('showsGrid');
     const viewAllBtn = document.getElementById('viewAllBtn');
+    const searchInput = document.querySelector('.search-box input');
+    const searchButton = document.querySelector('.search-box button');
+    const searchResults = document.querySelector('.search-results');
+    const tvSeriesContainer = document.querySelector('#showsGrid');
 
-    // Fetch Trending Shows
+    // Search: Hide results initially
+    searchResults.style.display = 'none';
+
+    // 🔍 Search TV Shows
+    async function searchTVSeries(query) {
+      try {
+        const response = await fetch(`${BASE_URL}/search/tv?api_key=${API_KEY}&query=${encodeURIComponent(query)}`);
+        if (!response.ok) throw new Error('Network response was not ok');
+        const data = await response.json();
+        return data.results || [];
+      } catch (error) {
+        console.error('Search failed:', error);
+        return [];
+      }
+    }
+
+    function displaySearchResults(series) {
+      if (!series || series.length === 0) {
+        searchResults.innerHTML = '<p class="search-message">No results found</p>';
+        return;
+      }
+
+      searchResults.innerHTML = series.map(show => `
+        <div class="tv-series-card" data-id="${show.id}">
+          <img src="${show.poster_path ? `https://image.tmdb.org/t/p/w300${show.poster_path}` : 'images/placeholder.jpg'}" 
+               alt="${show.name}" 
+               onerror="this.src='images/placeholder.jpg'">
+          <div class="tv-series-info">
+            <h3>${show.name}</h3>
+            <span>⭐ ${show.vote_average?.toFixed(1) || 'N/A'}</span>
+          </div>
+        </div>
+      `).join('');
+
+      // Click handler for search results
+      document.querySelectorAll('.tv-series-card').forEach(card => {
+        card.addEventListener('click', () => {
+          window.location.href = `tv-details.html?id=${card.dataset.id}`;
+        });
+      });
+
+      tvSeriesContainer.style.display = 'none';
+      searchResults.style.display = 'grid';
+    }
+
+    const handleSearch = async () => {
+      const query = searchInput.value.trim();
+      if (!query) {
+        searchResults.style.display = 'none';
+        tvSeriesContainer.style.display = 'grid';
+        return;
+      }
+      const results = await searchTVSeries(query);
+      displaySearchResults(results);
+    };
+
+    searchButton.addEventListener('click', handleSearch);
+    searchInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') handleSearch();
+    });
+
+    // 🔥 Trending Shows
     async function fetchTrendingShows() {
       try {
         const res = await fetch(`${BASE_URL}/trending/tv/week?api_key=${API_KEY}`);
@@ -456,17 +534,15 @@
         trendingCarousel.innerHTML = data.results.slice(0, 10).map((show, index) => `
           <div class="trending-item" data-id="${show.id}">
             <img src="https://image.tmdb.org/t/p/w500${show.backdrop_path || show.poster_path}" 
-                 alt="${show.name}"
-                 loading="lazy">
+                 alt="${show.name}" loading="lazy">
             <div class="trending-badge">#${index + 1}</div>
           </div>
         `).join('');
 
-        // Add click event to trending items
         document.querySelectorAll('.trending-item').forEach(item => {
           item.addEventListener('click', () => {
             const showId = item.dataset.id;
-            window.location.href = `details.html?id=${showId}`;
+            window.location.href = `tv-details.html?id=${showId}`;
           });
         });
 
@@ -475,13 +551,12 @@
       }
     }
 
-    // Fetch TV Genres
+    // 🎭 TV Genres
     async function fetchTVGenres() {
       try {
         const res = await fetch(`${BASE_URL}/genre/tv/list?api_key=${API_KEY}`);
         const data = await res.json();
         
-        // Add 'All' genre first
         genreFilter.innerHTML = `
           <button class="genre-btn active" data-genre="all">All</button>
           ${data.genres.map(genre => `
@@ -489,7 +564,6 @@
           `).join('')}
         `;
 
-        // Add genre filter event listeners
         document.querySelectorAll('.genre-btn').forEach(btn => {
           btn.addEventListener('click', () => {
             document.querySelectorAll('.genre-btn').forEach(b => b.classList.remove('active'));
@@ -504,7 +578,7 @@
       }
     }
 
-    // Fetch Popular Shows
+    // 📺 Popular Shows
     async function fetchPopularShows() {
       try {
         const res = await fetch(`${BASE_URL}/tv/popular?api_key=${API_KEY}`);
@@ -523,24 +597,17 @@
       }
     }
 
-    // Filter and Display Shows
     function filterShows() {
       let filteredShows = allShows;
-      
-      // Filter by genre if not 'all'
+
       if (currentGenre !== 'all') {
-        filteredShows = allShows.filter(show => 
-          show.genre_ids.includes(Number(currentGenre))
-        );
+        filteredShows = allShows.filter(show => show.genre_ids.includes(Number(currentGenre)));
       }
 
-      // Show either limited or all shows based on view state
-      const showsToDisplay = isViewAll ? filteredShows : filteredShows.slice(0, 9);
-      
+      const showsToDisplay = isViewAll ? filteredShows : filteredShows.slice(0, 10);
       displayShows(showsToDisplay);
     }
 
-    // Display Shows in Grid
     function displayShows(shows) {
       showsGrid.innerHTML = shows.map(show => `
         <div class="tv-card" data-id="${show.id}">
@@ -554,103 +621,26 @@
         </div>
       `).join('');
 
-      // Add click event to each card
       document.querySelectorAll('.tv-card').forEach(card => {
         card.addEventListener('click', () => {
           const showId = card.dataset.id;
-          window.location.href = `details.html?id=${showId}`;
+          window.location.href = `tv-details.html?id=${showId}`;
         });
       });
     }
 
-    // View All Button
+    // 🔘 View All Toggle
     viewAllBtn.addEventListener('click', () => {
       isViewAll = !isViewAll;
       viewAllBtn.textContent = isViewAll ? 'Show Less' : 'View All';
       filterShows();
     });
 
-    // Initialize
-    document.addEventListener('DOMContentLoaded', () => {
-      fetchTrendingShows();
-      fetchTVGenres();
-      fetchPopularShows();
-    });
-    
-    // Add these new functions for search functionality
-document.addEventListener('DOMContentLoaded', function() {
-  const API_KEY = '38d01855c73113431d5d64e22d399ac4';
-  const BASE_URL = 'https://api.themoviedb.org/3';
-  const searchInput = document.querySelector('.search-box input');
-  const searchButton = document.querySelector('.search-box button');
-  const searchResults = document.querySelector('.search-results');
-  const tvSeriesContainer = document.querySelector('.tv-series-container');
-
-  // Initialize
-  searchResults.style.display = 'none';
-
-  // Search function with error handling
-  async function searchTVSeries(query) {
-    try {
-      const response = await fetch(
-        `${BASE_URL}/search/tv?api_key=${API_KEY}&query=${encodeURIComponent(query)}`
-      );
-      if (!response.ok) throw new Error('Network response was not ok');
-      const data = await response.json();
-      return data.results || [];
-    } catch (error) {
-      console.error('Search failed:', error);
-      return [];
-    }
-  }
-
-  // Display results
-  function displaySearchResults(series) {
-    if (!series || series.length === 0) {
-      searchResults.innerHTML = '<p class="search-message">No results found</p>';
-      return;
-    }
-
-    searchResults.innerHTML = series.map(show => `
-      <div class="tv-series-card" data-id="${show.id}">
-        <img src="${show.poster_path ? `https://image.tmdb.org/t/p/w300${show.poster_path}` : 'images/placeholder.jpg'}" 
-             alt="${show.name}" 
-             onerror="this.src='images/placeholder.jpg'">
-        <div class="tv-series-info">
-          <h3>${show.name}</h3>
-          <span>⭐ ${show.vote_average?.toFixed(1) || 'N/A'}</span>
-        </div>
-      </div>
-    `).join('');
-
-    // Add click handlers
-    document.querySelectorAll('.tv-series-card').forEach(card => {
-      card.addEventListener('click', () => {
-        window.location.href = `tv-details.html?id=${card.dataset.id}`;
-      });
-    });
-
-    tvSeriesContainer.style.display = 'none';
-    searchResults.style.display = 'grid';
-  }
-
-  // Event listeners
-  const handleSearch = async () => {
-    const query = searchInput.value.trim();
-    if (!query) {
-      searchResults.style.display = 'none';
-      tvSeriesContainer.style.display = 'grid';
-      return;
-    }
-    const results = await searchTVSeries(query);
-    displaySearchResults(results);
-  };
-
-  searchButton.addEventListener('click', handleSearch);
-  searchInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') handleSearch();
+    // Init Everything
+    fetchTrendingShows();
+    fetchTVGenres();
+    fetchPopularShows();
   });
-});
-  </script>
+</script>
 </body>
 </html>
