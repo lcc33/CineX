@@ -297,6 +297,8 @@ const BASE_URL = 'https://api.themoviedb.org/3';
 async function fetchPopularMovies() {
   try {
     const response = await fetch(`${BASE_URL}/trending/all/day?api_key=${API_KEY}`);
+    if (!response.ok) throw new Error('Failed to fetch trending');
+
     const data = await response.json();
     displayMovies(data.results);
   } catch (error) {
@@ -304,26 +306,39 @@ async function fetchPopularMovies() {
   }
 }
 
-function displayMovies(movies) {
+function displayMovies(items) {
   const movieGrid = document.getElementById('popularMovies');
+  if (!movieGrid) {
+    console.warn('Element #popularMovies not found!');
+    return;
+  }
 
-  movieGrid.innerHTML = movies
-    .filter(item => item.media_type === 'movie' || item.media_type === 'tv')
-    .map(item => {
-      const type = item.media_type === 'tv' ? 'tv-details' : 'details';
-      const title = item.title || item.name || 'Untitled';
-      const poster = item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : 'placeholder.jpg';
+  const validItems = items.filter(item =>
+    item.media_type === 'movie' || item.media_type === 'tv'
+  );
 
-      return `
-        <div class="movie-card" onclick="window.location.href='${type}.html?id=${item.id}'">
-          <img src="${poster}" alt="${title}">
-          <div class="movie-info">
-            <h3>${title}</h3>
-            <span>⭐ ${item.vote_average?.toFixed(1) || 'N/A'}</span>
-          </div>
+  if (validItems.length === 0) {
+    movieGrid.innerHTML = '<p>No results found.</p>';
+    return;
+  }
+
+  movieGrid.innerHTML = validItems.map(item => {
+    const type = item.media_type === 'tv' ? 'tv-details' : 'details';
+    const title = item.title || item.name || 'Untitled';
+    const poster = item.poster_path
+      ? `https://image.tmdb.org/t/p/w500${item.poster_path}`
+      : 'placeholder.jpg';
+
+    return `
+      <div class="movie-card" onclick="location.href='${type}.html?id=${item.id}'">
+        <img src="${poster}" alt="${title}">
+        <div class="movie-info">
+          <h3>${title}</h3>
+          <span>⭐ ${item.vote_average?.toFixed(1) || 'N/A'}</span>
         </div>
-      `;
-    }).join('');
+      </div>
+    `;
+  }).join('');
 }
 
 function displayComingSoon(movies) {
