@@ -792,7 +792,7 @@ searchInput.addEventListener('input', async () => {
   }
 
   try {
-    const res = await fetch(`${BASE_URL}/search/multi?api_key=${API_KEY}&query=${query}`);
+    const res = await fetch(`${BASE_URL}/search/multi?api_key=${API_KEY}&query=${encodeURIComponent(query)}`)
     const data = await res.json();
 
     const results = data.results.slice(0, 6); // limit results
