@@ -105,14 +105,13 @@
     </div>
   </header>
 
-    <main class="movie-details-container" id="movieDetails">
+  <main class="movie-details-container" id="movieDetails">
     <!-- Content will be dynamically inserted here -->
   </main>
-
   
   <script>
-const API_KEY = '38d01855c73113431d5d64e22d399ac4';
-const BASE_URL = 'https://api.themoviedb.org/3';
+    const API_KEY = '38d01855c73113431d5d64e22d399ac4';
+    const BASE_URL = 'https://api.themoviedb.org/3';
 
     // Menu toggle functionality
     document.addEventListener('DOMContentLoaded', function() {
@@ -261,7 +260,7 @@ const BASE_URL = 'https://api.themoviedb.org/3';
         document.querySelectorAll('.movie-card').forEach(card => {
           card.addEventListener('click', function() {
             const id = card.dataset.id;
-            if (id) window.location.href = `movie.html?id=${id}`;
+            if (id) window.location.href = `index.html?id=${id}`;
           });
         });
         
