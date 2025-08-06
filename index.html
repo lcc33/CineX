@@ -211,7 +211,7 @@ async function displayHeroSlider() {
   const slider = document.getElementById('heroSlider');
   const dotsContainer = document.getElementById('sliderDots');
 
-   // Create Slides
+  // Create Slides
   slider.innerHTML = movies.map(movie => `
     <div class="slide" style="background-image: linear-gradient(to right, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%), url('https://image.tmdb.org/t/p/original${movie.backdrop_path}')">
       <div class="slide-content" style="background-color: #0000008d">
@@ -297,35 +297,25 @@ const BASE_URL = 'https://api.themoviedb.org/3';
 async function fetchPopularMovies() {
   try {
     const response = await fetch(`${BASE_URL}/movie/popular?api_key=${API_KEY}`);
-    if (!response.ok) throw new Error('Failed to fetch popular movies');
-
     const data = await response.json();
     displayMovies(data.results);
   } catch (error) {
-    console.error("Error fetching popular movies:", error);
+    console.error("Error fetching movies:", error);
   }
 }
 
+
 function displayMovies(movies) {
   const movieGrid = document.getElementById('popularMovies');
-  if (!movieGrid) return;
-
-  movieGrid.innerHTML = movies.map(movie => {
-    const title = movie.title || 'Untitled';
-    const poster = movie.poster_path
-      ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-      : 'placeholder.jpg';
-
-    return `
-      <div class="movie-card" onclick="location.href='details.html?id=${movie.id}'">
-        <img src="${poster}" alt="${title}">
-        <div class="movie-info">
-          <h3>${title}</h3>
-          <span>⭐ ${movie.vote_average?.toFixed(1) || 'N/A'}</span>
-        </div>
+  movieGrid.innerHTML = movies.map(movie => `
+    <div class="movie-card" onclick="window.location.href='details.html?id=${movie.id}'">
+      <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}" alt="${movie.title}">
+      <div class="movie-info">
+        <h3>${movie.title}</h3>
+        <span>⭐ ${movie.vote_average.toFixed(1)}</span>
       </div>
-    `;
-  }).join('');
+    </div>
+  `).join('');
 }
 
 function displayComingSoon(movies) {
@@ -668,158 +658,4 @@ function updateProgress() {
 function updateProgress(percent) {
   const progressBar = document.querySelector('.progress-bar');
   progressBar.setAttribute('aria-valuenow', percent);
-  document.getElementById('loadingMessage').textContent = 
-    `Loading CineXpress... ${percent}%`;
-}
-
-function hideLoadingScreen() {
-  document.getElementById('loadSound').play();
-  // ... rest of the function
-}
-
-// Global variable to track loading state
-let isLoading = true;
-
-async function hideLoadingScreen() {
-  const loadingScreen = document.getElementById('loadingScreen');
-  if (!loadingScreen) return;
-  
-  loadingScreen.style.opacity = '0';
-  loadingScreen.style.pointerEvents = 'none';
-  
-  // Wait for fade-out animation to complete
-  await new Promise(resolve => setTimeout(resolve, 500));
-  
-  loadingScreen.style.display = 'none';
-  isLoading = false;
-}
-
-async function showLoadingScreen() {
-  if (isLoading) return;
-  isLoading = true;
-  
-  const loadingScreen = document.getElementById('loadingScreen');
-  loadingScreen.style.display = 'flex';
-  loadingScreen.style.opacity = '1';
-  loadingScreen.style.pointerEvents = 'auto';
-  
-  // Reset progress bar
-  document.querySelector('.progress').style.width = '0%';
-}
-
-// Modified fetch function
-async function fetchPopularMovies() {
-  showLoadingScreen();
-  
-  try {
-    const response = await fetch(`${BASE_URL}/movie/popular?api_key=${API_KEY}`);
-    if (!response.ok) throw new Error('Network response was not ok');
-    
-    const data = await response.json();
-    displayMovies(data.results);
-    updateProgress(50); // Example progress update
-    
-  } catch (error) {
-    console.error("Fetch error:", error);
-    document.getElementById('loadingMessage').textContent = "Error loading movies";
-    await new Promise(resolve => setTimeout(resolve, 2000));
-  } finally {
-    await hideLoadingScreen();
-  }
-}
-
-// Call this when all critical assets are loaded
-function initApp() {
-  window.addEventListener('load', async () => {
-    // Artificial delay for demo (remove in production)
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    await hideLoadingScreen();
-  });
-}
-
-initApp();
-
-// Sound Control System
-let soundEnabled = false;
-const audioElement = document.getElementById('loadSound');
-const soundIcon = document.getElementById('soundIcon');
-
-// Initialize audio (must be triggered by user)
-function initAudio() {
-  // This empty play/pause cycle unlocks audio on iOS
-  audioElement.volume = 0.5;
-  audioElement.play().then(() => {
-    audioElement.pause();
-    audioElement.currentTime = 0;
-  }).catch(e => console.log("Audio init:", e));
-}
-
-// Toggle sound
-document.getElementById('soundToggle').addEventListener('click', () => {
-  soundEnabled = !soundEnabled;
-  
-  if (soundEnabled) {
-    soundIcon.textContent = "🔊";
-    document.querySelector('#soundToggle span').textContent = "Sound On";
-    initAudio();
-  } else {
-    soundIcon.textContent = "🔇";
-    document.querySelector('#soundToggle span').textContent = "Sound Off";
-    audioElement.pause();
-  }
-});
-
-// Safe play function
-function playLoadSound() {
-  if (!soundEnabled) return;
-  
-  audioElement.currentTime = 0; // Rewind
-  audioElement.play().catch(e => {
-    console.log("Sound play blocked:", e);
-    // Auto-disable sound if blocked
-    soundEnabled = false;
-    soundIcon.textContent = "🔇";
-  });
-}
-
-document.getElementById('forceHide')?.addEventListener('click', () => {
-  console.warn("Force-hiding loading screen");
-  const loadingScreen = document.getElementById('loadingScreen');
-  loadingScreen.style.transition = 'none';
-  loadingScreen.style.display = 'none';
-  isLoading = false;
-});
-
-const searchInput = document.getElementById('searchInput');
-const searchResults = document.getElementById('searchResults');
-
-searchInput.addEventListener('input', async () => {
-  const query = searchInput.value.trim();
-
-  if (query.length === 0) {
-    searchResults.innerHTML = '';
-    return;
-  }
-
-  try {
-    const res = await fetch(`${BASE_URL}/search/multi?api_key=${API_KEY}&query=${encodeURIComponent(query)}`)
-    const data = await res.json();
-
-    const results = data.results.slice(0, 6); // limit results
-    searchResults.innerHTML = results
-      .map(item => {
-        const title = item.title || item.name || 'Untitled';
-        const id = item.id;
-        const type = item.media_type === 'tv' ? 'tv' : 'movie';
-        return `<li onclick="location.href='${type}.html?id=${id}'">${title}</li>`;
-      })
-      .join('');
-  } catch (err) {
-    console.error('Error fetching search results:', err);
-    searchResults.innerHTML = '';
-  }
-});
-
-</script>
-</html>
-
+  document.ge
