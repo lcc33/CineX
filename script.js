@@ -275,6 +275,8 @@ async function displayComingSoonMovies() {
 async function init() {
   await displayGenreFilters();
   await fetchMoviesByGenre('all'); // Load popular movies by default
+
+  document.getElementById('loadingScreen').style.display = 'none';
 }
 
 window.onload = init;
